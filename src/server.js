@@ -1,13 +1,16 @@
 const { app } = require("./loaders/app");
 const { port } = require("./config/env");
+const { logger } = require("./utils/logger");
 
-const server = app.listen(port);
+const server = app.listen(port, () => {
+    logger.info("server on running", { port: port });
+});
 
 process.on("unhandledRejection", (err) => {
-    console.error("Unhandled Promise Rejection:", err.message);
+    logger.error("Unhandled Promise Rejection:", { error: err });
     server.close((error) => {
         if (error) {
-            console.error(
+            logger.error(
                 "Error occurred while closing the server:",
                 error.message
             );
@@ -18,9 +21,9 @@ process.on("unhandledRejection", (err) => {
     });
 });
 process.on("uncaughtException", (err) => {
-    console.error("Uncaught Exception:", err.message);
+    logger.error("Uncaught Exception:", err.message);
     server.close(() => {
-        console.error("Server shut down due to uncaught exception");
+        logger.error("Server shut down due to uncaught exception");
         process.exit(1);
     });
 });

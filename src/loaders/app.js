@@ -7,14 +7,19 @@ const cors = require("cors");
 const helmet = require("helmet");
 const hpp = require("hpp");
 const rateLimit = require("express-rate-limit");
+const morgan = require("morgan");
 
 //require from modules
 const { whiteList } = require("../config/env");
 const { errorHandlerGlobal } = require("../middlewares/errorHandlerGlobal");
 const { notFound404 } = require("../middlewares/notFound404");
-const CustomError = require('../utils/customError');
+const CustomError = require("../utils/customError");
+const { logger } = require("../utils/logger");
+const audit = require("../utils/audit");
 
 // -----------------------------------------Middleware-----------------------------------------------------------
+
+
 
 //parses the incoming JSON request body into a JavaScript object.
 app.use(express.json());
@@ -41,7 +46,15 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-//test
+//logging
+let loggerStream = {
+    write: (msg) => {
+        return logger.info(msg);
+    },
+};
+app.use(morgan("tiny", { stream: loggerStream }));
+
+// -----------------------------------------Routes---------------------------------------------------------------
 
 app.get("/", (req, res, next) => {
     try {
@@ -51,6 +64,7 @@ app.get("/", (req, res, next) => {
     }
 });
 
+// ---------------------------------------------------------------------------------------------------------------
 //handling express errors
 app.all("*", notFound404);
 
