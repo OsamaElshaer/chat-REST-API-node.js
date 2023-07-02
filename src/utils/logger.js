@@ -10,37 +10,37 @@ class Logger {
             transports: [
                 process.env.NODE_ENV === "development"
                     ? new transports.Console({
-                            format: combine(
-                                timestamp(),
-                                format.metadata({
-                                    fillExcept: [
-                                        "timestamp",
-                                        "service",
-                                        "level",
-                                        "message",
-                                    ],
-                                }),
-                                colorize(),
-                                this.winstonConsoleFormat()
-                            ),
-                        })
-                        : new transports.File({
-                            filename: `./logs/${this.name}.log`,
-                            format: combine(
-                                timestamp(),
-                                format.metadata({
-                                    fillExcept: [
-                                        "timestamp",
-                                        "service",
-                                        "level",
-                                        "message",
-                                    ],
-                                }),
-                                errors({ stack: true }),
-                                json(),
-                                this.winstonConsoleFormat()
-                            ),
-                        }),
+                          format: combine(
+                              timestamp(),
+                              format.metadata({
+                                  fillExcept: [
+                                      "timestamp",
+                                      "service",
+                                      "level",
+                                      "message",
+                                  ],
+                              }),
+                              colorize(),
+                              this.winstonConsoleFormat()
+                          ),
+                      })
+                    : new transports.File({
+                          filename: `./logs/${this.name}.log`,
+                          format: combine(
+                              timestamp(),
+                              format.metadata({
+                                  fillExcept: [
+                                      "timestamp",
+                                      "service",
+                                      "level",
+                                      "message",
+                                  ],
+                              }),
+                              errors({ stack: true }),
+                              json(),
+                              this.winstonConsoleFormat()
+                          ),
+                      }),
             ],
         });
     }
