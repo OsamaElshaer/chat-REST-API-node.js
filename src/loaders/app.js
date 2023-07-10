@@ -13,13 +13,11 @@ const morgan = require("morgan");
 const { whiteList } = require("../config/env");
 const { errorHandlerGlobal } = require("../middlewares/errorHandlerGlobal");
 const { notFound404 } = require("../middlewares/notFound404");
-const CustomError = require("../utils/customError");
 const { logger } = require("../utils/logger");
-const audit = require("../utils/audit");
+const { router } = require("../routes/index");
+const swagger = require("../config/swagger");
 
 // -----------------------------------------Middleware-----------------------------------------------------------
-
-
 
 //parses the incoming JSON request body into a JavaScript object.
 app.use(express.json());
@@ -41,7 +39,7 @@ app.use(helmet());
 //limit requests rate
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
     message: "Too many requests from this IP, please try again after an 15 min",
 });
 app.use(limiter);
@@ -55,14 +53,8 @@ let loggerStream = {
 app.use(morgan("tiny", { stream: loggerStream }));
 
 // -----------------------------------------Routes---------------------------------------------------------------
-
-app.get("/", (req, res, next) => {
-    try {
-        throw new CustomError(400, "Name parameter is missing");
-    } catch (error) {
-        next(error);
-    }
-});
+swagger(app);
+app.use("/api", router);
 
 // ---------------------------------------------------------------------------------------------------------------
 //handling express errors

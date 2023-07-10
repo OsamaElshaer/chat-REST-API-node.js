@@ -1,16 +1,19 @@
 const { MongoClient } = require("mongodb");
 const { logger } = require("../utils/logger");
+const { dbHost } = require("../config/env");
 
-const url = "mongodb://localhost:27017";
+const url = dbHost;
 let _db;
 
 const mongoConnect = async () => {
     try {
-        const client = await MongoClient.connect(url, {
-            socketTimeoutMS: 1000,
-        });
-        _db = client.db("chatty");
-        logger.info("Connected to MongoDB successfully");
+        const client = await MongoClient.connect(url);
+        if (process.env.NODE_ENV === "test") {
+            _db = client.db("testChatty");
+        } else {
+            _db = client.db("chatty");
+            logger.info("Connected to MongoDB successfully");
+        }
     } catch (error) {
         logger.error("Failed to connect to the database:", error.message);
         throw new Error("Failed to connect to the database");
