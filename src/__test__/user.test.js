@@ -10,10 +10,10 @@ describe("user operations", () => {
 
     it("should create a new user", async () => {
         const newUser = {
-            userName: "osama31005",
-            email: "osama@email.com",
-            password: "12345678",
-            passwordConfirmation: "12345678",
+            userName: "OsamaElshaer123",
+            email: "OsamaElshaer123@email.com",
+            password: "password123",
+            passwordConfirmation: "password123",
         };
 
         const response = await request(app)
@@ -22,6 +22,19 @@ describe("user operations", () => {
 
         expect(response.status).toBe(201);
         expect(ObjectId.isValid(response.body.data.userId)).toBeTruthy();
+    });
+
+    it("should Login and return token", async () => {
+        const userData = {
+            userName: "OsamaElshaer123",
+            password: "password123",
+        };
+        const response = await request(app)
+            .post("/api/users/login")
+            .send(userData);
+
+        expect(response.status).toBe(201);
+        expect(response.body.data.token).toBeTruthy();
     });
 
     afterAll(async () => {

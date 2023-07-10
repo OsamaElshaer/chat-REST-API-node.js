@@ -1,15 +1,15 @@
 const nodemailer = require("nodemailer");
 const { email } = require("../config/env");
 const { logger } = require("./logger");
-const CustomError = require("./customError");
+const env = require("../config/env");
 
 exports.sendMail = async (emailTo, subject, text) => {
     try {
         const transporter = nodemailer.createTransport({
             service: "Gmail",
             auth: {
-                user: "your-email@gmail.com",
-                pass: "your-password",
+                user: env.nodemailerUser,
+                pass: env.nodemailerPass,
             },
         });
 

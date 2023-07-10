@@ -14,21 +14,62 @@ paths:
                 content:
                     application/json:
                         schema:
-                            type: object
-                            properties:
-                                userName:
-                                    type: string
-                                email:
-                                    type: string
-                                password:
-                                    type: string
-                            example:
-                                userName: JohnDoe
-                                email: john.doe@example.com
-                                password: password123
-                                passwordConfirmation: password123
+                            $ref: "#/components/schemas/SignupRequest"
+                        example:
+                            userName: JohnDoe
+                            email: john.doe@example.com
+                            password: password123
+                            passwordConfirmation: password123
             responses:
                 "201":
                     description: User signed up successfully
                 "422":
                     description: Validation error
+    /api/users/login:
+        post:
+            summary: Login
+            description: Login and return token.
+            tags:
+                - Users
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/LoginRequest"
+                        example:
+                            userName: JohnDoe
+                            password: password123
+            responses:
+                "201":
+                    description: User logged in successfully
+                "422":
+                    description: Validation error
+components:
+    schemas:
+        SignupRequest:
+            type: object
+            properties:
+                userName:
+                    type: string
+                email:
+                    type: string
+                password:
+                    type: string
+                passwordConfirmation:
+                    type: string
+            example:
+                userName: JohnDoe
+                email: john.doe@example.com
+                password: password123
+                passwordConfirmation: password123
+        LoginRequest:
+            type: object
+            properties:
+                userName:
+                    type: string
+                password:
+                    type: string
+            example:
+                userName: JohnDoe
+                password: password123

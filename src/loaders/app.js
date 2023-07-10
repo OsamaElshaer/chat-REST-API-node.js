@@ -14,7 +14,7 @@ const { whiteList } = require("../config/env");
 const { errorHandlerGlobal } = require("../middlewares/errorHandlerGlobal");
 const { notFound404 } = require("../middlewares/notFound404");
 const { logger } = require("../utils/logger");
-const { router } = require("../routes/index");
+const { router } = require("../api/index");
 const swagger = require("../config/swagger");
 
 // -----------------------------------------Middleware-----------------------------------------------------------
