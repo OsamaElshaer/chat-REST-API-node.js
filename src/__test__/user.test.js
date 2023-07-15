@@ -10,24 +10,23 @@ describe("user operations", () => {
 
     it("should create a new user", async () => {
         const newUser = {
-            userName: "OsamaElshaer123",
-            email: "OsamaElshaer123@email.com",
-            password: "password123",
-            passwordConfirmation: "password123",
+            userName: "osama1111",
+            email: "osama@elshaer.com",
+            password: "Password@123",
+            passwordConfirmation: "Password@123",
         };
 
         const response = await request(app)
             .post("/api/users/signup")
             .send(newUser);
-
         expect(response.status).toBe(201);
         expect(ObjectId.isValid(response.body.data.userId)).toBeTruthy();
-    });
+    }, 10000);
 
     it("should Login and return token", async () => {
         const userData = {
-            userName: "OsamaElshaer123",
-            password: "password123",
+            userName: "osama1111",
+            password: "Password@123",
         };
         const response = await request(app)
             .post("/api/users/login")
@@ -37,7 +36,15 @@ describe("user operations", () => {
         expect(response.body.data.token).toBeTruthy();
     });
 
+    it("should assign token to user to give ability to change password", async () => {
+        const email = "osama@elshaer.com";
+        const response = await request(app)
+            .post("/api/users/forgetPassword")
+            .send({ email });
+        expect(response.body.data.sendMail).toBeTruthy();
+    }, 10000);
+
     afterAll(async () => {
-        await getDb().dropCollection("users");
+        await getDb().dropDatabase();
     });
 });

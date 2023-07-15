@@ -9,6 +9,9 @@ const {
     NODEMAILER_USER,
     NODEMAILER_PASS,
     SECRET_KEY,
+    SENDGRID_API_KEY,
+    MAILTRAP_USER,
+    MAILTRAP_PASS,
 } = process.env;
 module.exports = {
     port: PORT,
@@ -18,4 +21,7 @@ module.exports = {
     nodemailerUser: NODEMAILER_USER,
     nodemailerPass: NODEMAILER_PASS,
     secretKey: SECRET_KEY,
+    sendgridApiKey: SENDGRID_API_KEY,
+    mailTrapUser: MAILTRAP_USER,
+    mailTrapPass: MAILTRAP_PASS,
 };

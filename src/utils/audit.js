@@ -6,16 +6,16 @@ emitter.on("audit", (e) => {
     logger.info(JSON.stringify(e));
 });
 
-const audit = (model, action, by, date, method, statusCode) => {
+const audit = (model, action, by, method, statusCode) => {
     const auditData = {
         model,
         action,
         by,
-        date,
+        date: new Date(),
         method,
         statusCode,
     };
     emitter.emit("audit", auditData);
 };
 
-module.exports = audit;
+module.exports.audit = audit;
