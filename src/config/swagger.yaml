@@ -18,8 +18,8 @@ paths:
                         example:
                             userName: JohnDoe
                             email: john.doe@example.com
-                            password: password123
-                            passwordConfirmation: password123
+                            password: Password@123
+                            passwordConfirmation: Password@123
             responses:
                 "201":
                     description: User signed up successfully
@@ -39,10 +39,56 @@ paths:
                             $ref: "#/components/schemas/LoginRequest"
                         example:
                             userName: JohnDoe
-                            password: password123
+                            password: Password@123
             responses:
                 "201":
                     description: User logged in successfully
+                "422":
+                    description: Validation error
+    /api/users/forgetPassword:
+        post:
+            summary: Forget Password
+            description: Send token to user email for confirmation and password reset.
+            tags:
+                - Users
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ForgetPasswordRequest"
+                        example:
+                            email: john.doe@example.com
+            responses:
+                "201":
+                    description: Password reset token sent successfully
+                "422":
+                    description: Validation error
+    /api/users/resetPassword/{resetToken}:
+        post:
+            summary: Reset Password
+            description: Reset password after confirming the token validity.
+            tags:
+                - Users
+            parameters:
+                - in: path
+                  name: resetToken
+                  description: Reset token received from email confirmation
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ResetPasswordRequest"
+                        example:
+                            password: Password@123
+                            passwordConfirmation: Password@123
+            responses:
+                "201":
+                    description: Password reset successfully
                 "422":
                     description: Validation error
 components:
@@ -61,8 +107,8 @@ components:
             example:
                 userName: JohnDoe
                 email: john.doe@example.com
-                password: password123
-                passwordConfirmation: password123
+                password: Password@123
+                passwordConfirmation: Password@123
         LoginRequest:
             type: object
             properties:
@@ -72,4 +118,21 @@ components:
                     type: string
             example:
                 userName: JohnDoe
-                password: password123
+                password: Password@123
+        ForgetPasswordRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+            example:
+                email: john.doe@example.com
+        ResetPasswordRequest:
+            type: object
+            properties:
+                password:
+                    type: string
+                passwordConfirmation:
+                    type: string
+            example:
+                password: Password@123
+                passwordConfirmation: Password@123

@@ -7,6 +7,13 @@ const env = require("../config/env");
 exports.sendMail = async (emailTo, subject, html) => {
     try {
         let transporter;
+        const mailOptions = {
+            from: env.email,
+            to: emailTo,
+            subject: subject,
+            html: html,
+        };
+
         if (process.env.NODE_ENV === "test") {
             transporter = nodemailer.createTransport({
                 host: "sandbox.smtp.mailtrap.io",
@@ -16,20 +23,21 @@ exports.sendMail = async (emailTo, subject, html) => {
                     pass: env.mailTrapPass,
                 },
             });
+        } else {
+            transporter = nodemailer.createTransport(
+                sendgridTransport({
+                    auth: {
+                        api_key: env.sendgridApiKey,
+                    },
+                })
+            );
         }
-        
-
-        const mailOptions = {
-            from: env.email,
-            to: emailTo,
-            subject: subject,
-            html: html,
-        };
 
         await transporter.sendMail(mailOptions);
         return true;
     } catch (error) {
         logger.warn("Error sending email:", { error: error.message });
-        throw new Error(error);
+        console.log(error);
+        return false;
     }
 };

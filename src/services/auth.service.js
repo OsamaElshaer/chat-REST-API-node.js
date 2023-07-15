@@ -11,6 +11,7 @@ const {
     forgetPasswordTemplate,
     signUpTemplate,
 } = require("../utils/mailMessages");
+const { error } = require("console");
 
 exports.signUp = async (req, res, next) => {
     try {
@@ -23,24 +24,21 @@ exports.signUp = async (req, res, next) => {
         const userId = await createUser(userName, email, hashedPassword);
         //send mail
         const subject = "Welcome to Our Application!";
-        const text = signUpTemplate(userName);
+        const html = signUpTemplate(userName);
 
-        const sendMailRes = await sendMail(email, subject, text);
-        const result = {
-            userId,
-            sendMailRes,
-        };
+        sendMail(email, subject, html);
+
         audit(
             "User",
             "Signup",
             userName,
-            new Date(),
+
             req.method,
             res.statusCode
         );
         return res.status(201).json({
             msg: "User signed up successfully",
-            data: result,
+            data: { userId: userId, status: true },
         });
     } catch (error) {
         next(error);
@@ -56,17 +54,10 @@ exports.login = async (req, res, next) => {
         const payload = { username: userName };
 
         const token = jwt.sign(payload, env.secretKey, { expiresIn: "5h" });
-        audit(
-            "User",
-            "Login",
-            userName,
-            new Date(),
-            req.method,
-            res.statusCode
-        );
+        audit("User", "Login", userName, req.method, res.statusCode);
         return res.status(201).json({
             msg: "user logged in ",
-            data: { token: token },
+            data: { token: token, status: true },
         });
     } catch (error) {
         next(error);
@@ -89,20 +80,63 @@ exports.forgetPassword = async (req, res, next) => {
             });
         });
 
-        const token = buffer.toString("hex");
+        const resetToken = buffer.toString("hex");
+        const resestTokenExpire = Date.now() + 600000;
+        const passwordResetCount = 0;
+
         const user = req.user;
-        user.token = token;
-        user.tokenExpire = Date.now() + 36e5;
+        user.token = { resetToken, resestTokenExpire, passwordResetCount };
+
         await updateUser(user._id, user);
 
         const subject = "Forget Password";
-        const html = forgetPasswordTemplate(token);
+        const html = forgetPasswordTemplate(resetToken);
         const sendMailRes = await sendMail(user.email, subject, html);
 
+        audit(
+            "User",
+            "forget password",
+            user.userName,
+            req.method,
+            res.statusCode
+        );
         return res.status(201).json({
             msg: "Check your email to reset your password",
             data: {
                 sendMail: sendMailRes,
+                status: true,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.resetPassword = async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            throw new CustomError("resetPassword", 422, errors.array()[0].msg);
+        }
+        const { password } = req.body;
+        const user = req.user;
+        const hashPassword = await bcrypt.hash(password, 12);
+        user.password = hashPassword;
+        await updateUser(user._id, user);
+
+        user.token.passwordResetCount++;
+        updateUser(user._id, user);
+        audit(
+            "User",
+            "reset password",
+            user.userName,
+            req.method,
+            res.statusCode
+        );
+        return res.status(201).json({
+            msg: " user reset password successfully ",
+            data: {
+                status: true,
             },
         });
     } catch (error) {

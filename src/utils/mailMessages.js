@@ -1,4 +1,4 @@
-exports.forgetPasswordTemplate = (resetLink) => `
+exports.forgetPasswordTemplate = (resetToken) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,7 +70,7 @@ exports.forgetPasswordTemplate = (resetLink) => `
         <div class="content">
             <p>Dear User,</p>
             <p>We received a request to reset your password. Click the button below to reset your password:</p>
-            <a class="reset-button" href="${resetLink}">Reset Password</a>
+            <a class="reset-button" href="http://localhost:3000/resetPassword/${resetToken}">Reset Password</a>
         </div>
 
         <div class="footer">

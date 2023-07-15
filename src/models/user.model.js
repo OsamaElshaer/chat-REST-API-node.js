@@ -1,5 +1,4 @@
 const { getDb } = require("../loaders/database");
-const crypto = require("crypto");
 
 exports.createUser = async (userName, email, password) => {
     const user = {
@@ -12,10 +11,10 @@ exports.createUser = async (userName, email, password) => {
     return result.insertedId;
 };
 
-exports.findByUserName = async (userName) => {
-    const user = await getDb()
-        .collection("users")
-        .findOne({ userName: userName });
+
+exports.find = async (key, value) => {
+    const query = { [key]: value }; // Dynamically use key parameter as the key name
+    const user = await getDb().collection("users").findOne(query);
     return user;
 };
 
@@ -24,10 +23,5 @@ exports.updateUser = async (userId, updatedUserData) => {
     const result = await db
         .collection("users")
         .updateOne({ _id: userId }, { $set: updatedUserData });
-
-    if (result.modifiedCount === 1) {
-        return true;
-    } else {
-        throw new Error("User not found or update failed");
-    }
+    return result;
 };

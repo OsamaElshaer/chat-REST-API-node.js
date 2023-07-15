@@ -2,6 +2,7 @@ var { ObjectId } = require("mongodb");
 const request = require("supertest");
 const { app } = require("../loaders/app");
 const { mongoConnect, getDb } = require("../loaders/database");
+const { find } = require("../models/user.model");
 
 describe("user operations", () => {
     beforeAll(async () => {
@@ -11,7 +12,7 @@ describe("user operations", () => {
     it("should create a new user", async () => {
         const newUser = {
             userName: "osama1111",
-            email: "osama@elshaer.com",
+            email: "osamaelshaer944@gmail.com",
             password: "Password@123",
             passwordConfirmation: "Password@123",
         };
@@ -36,13 +37,23 @@ describe("user operations", () => {
         expect(response.body.data.token).toBeTruthy();
     });
 
-    it("should assign token to user to give ability to change password", async () => {
-        const email = "osama@elshaer.com";
-        const response = await request(app)
+    it(" should send token to user email to confirmation and reset password", async () => {
+        //forget password
+        const email = "osamaelshaer944@gmail.com";
+        const forgetPasswordResponse = await request(app)
             .post("/api/users/forgetPassword")
             .send({ email });
-        expect(response.body.data.sendMail).toBeTruthy();
-    }, 10000);
+        const user = await find("email", email);
+        expect(forgetPasswordResponse.body.data.sendMail).toBeTruthy();
+
+        //reset password
+        const password = "Password2@Again1";
+        const passwordConfirmation = "Password2@Again1";
+        const resetPasswordResponse = await request(app)
+            .post(`/api/users/resetPassword/${user.token.resetToken}`)
+            .send({ password, passwordConfirmation });
+        expect(resetPasswordResponse.body.data.status).toBeTruthy();
+    }, 30000);
 
     afterAll(async () => {
         await getDb().dropDatabase();

@@ -4,7 +4,7 @@
     "description": "ChatApp is a real-time messaging application that allows users to engage in seamless and instant communication.",
     "main": "src/server.js",
     "scripts": {
-        "test": "cross-env NODE_ENV=test   jest --watchAll",
+        "test": "cross-env NODE_ENV=test   jest",
         "start:prod": "node src/server.js",
         "start:dev": "cross-env NODE_ENV=development nodemon src/server.js"
     },
@@ -19,6 +19,7 @@
     },
     "homepage": "https://github.com/OsamaElshaer/chat-REST-API-node.js#readme",
     "dependencies": {
+        "@sendgrid/mail": "^7.7.0",
         "bcrypt": "^5.1.0",
         "cors": "^2.8.5",
         "crypto": "^1.0.1",
