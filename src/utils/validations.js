@@ -1,14 +1,14 @@
 const { body, param } = require("express-validator");
 const bcrypt = require("bcrypt");
-const { find } = require("../models/user.model");
-const { getDb } = require("../loaders/database");
+const { UserModel } = require("../models/user.model");
+const userModel = new UserModel();
 
 exports.validateSignup = [
     body("userName")
         .matches("^[0-9a-zA-Z ]+$", "i")
         .withMessage("Invalid username")
         .custom(async (value) => {
-            const user = await find("userName", value);
+            const user = await userModel.find("userName", value);
             if (user) {
                 throw new Error("User already exists");
             }
@@ -41,7 +41,7 @@ exports.validateLogin = [
         .matches("^[0-9a-zA-Z ]+$", "i")
         .withMessage("Invalid username")
         .custom(async (value, { req }) => {
-            const user = await find("userName", value);
+            const user = await userModel.find("userName", value);
             if (!user) {
                 throw new Error("User does not exist");
             }
@@ -65,7 +65,7 @@ exports.valiadteforgetPassword = [
         .isEmail()
         .normalizeEmail()
         .custom(async (value, { req }) => {
-            const user = await find("email", value);
+            const user = await userModel.find("email", value);
             if (!user) {
                 throw new Error("There is no user with this email");
             }
@@ -76,7 +76,7 @@ exports.valiadteforgetPassword = [
 
 exports.validateResetPassword = [
     param("resetToken").custom(async (value, { req }) => {
-        const user = await find({ "token.resetToken": value });
+        const user = await userModel.find({ "token.resetToken": value });
         if (
             !user ||
             Date.now() > user.token.resetTokenExpire ||

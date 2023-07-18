@@ -1,5 +1,4 @@
 const { sendMail } = require("../utils/sendMail");
-const { createUser, updateUser } = require("../models/user.model");
 const { validationResult } = require("express-validator");
 const CustomError = require("../utils/customError");
 const bcrypt = require("bcrypt");
@@ -11,135 +10,157 @@ const {
     forgetPasswordTemplate,
     signUpTemplate,
 } = require("../utils/mailMessages");
-const { error } = require("console");
 
-exports.signUp = async (req, res, next) => {
-    try {
-        const { userName, email, password } = req.body;
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            throw new CustomError("signup", 422, errors.array()[0].msg);
-        }
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const userId = await createUser(userName, email, hashedPassword);
-        //send mail
-        const subject = "Welcome to Our Application!";
-        const html = signUpTemplate(userName);
-
-        sendMail(email, subject, html);
-
-        audit(
-            "User",
-            "Signup",
-            userName,
-
-            req.method,
-            res.statusCode
-        );
-        return res.status(201).json({
-            msg: "User signed up successfully",
-            data: { userId: userId, status: true },
-        });
-    } catch (error) {
-        next(error);
+class AuthServices {
+    constructor(userModel) {
+        this.userModel = userModel;
     }
-};
-exports.login = async (req, res, next) => {
-    try {
-        const { userName } = req.body;
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            throw new CustomError("login", 422, errors.array()[0].msg);
-        }
-        const payload = { username: userName };
+    signUp = async (req, res, next) => {
+        try {
+            const { userName, email, password } = req.body;
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                throw new CustomError("signup", 422, errors.array()[0].msg);
+            }
+            const hashedPassword = await bcrypt.hash(password, 12);
+            const userId = await this.userModel.create(
+                userName,
+                email,
+                hashedPassword
+            );
+            //send mail
+            const subject = "Welcome to Our Application!";
+            const html = signUpTemplate(userName);
 
-        const token = jwt.sign(payload, env.secretKey, { expiresIn: "5h" });
-        audit("User", "Login", userName, req.method, res.statusCode);
-        return res.status(201).json({
-            msg: "user logged in ",
-            data: { token: token, status: true },
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-exports.forgetPassword = async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            throw new CustomError("forgetPassword", 422, errors.array()[0].msg);
-        }
-        const buffer = await new Promise((resolve, reject) => {
-            crypto.randomBytes(32, (err, buffer) => {
-                if (err) {
-                    reject(
-                        new CustomError("crypto randomToken", 422, err.message)
-                    );
-                }
-                resolve(buffer);
+            sendMail(email, subject, html);
+
+            audit(
+                "User",
+                "Signup",
+                userName,
+
+                req.method,
+                res.statusCode
+            );
+            return res.status(201).json({
+                msg: "User signed up successfully",
+                data: { userId: userId, status: true },
             });
-        });
-
-        const resetToken = buffer.toString("hex");
-        const resestTokenExpire = Date.now() + 600000;
-        const passwordResetCount = 0;
-
-        const user = req.user;
-        user.token = { resetToken, resestTokenExpire, passwordResetCount };
-
-        await updateUser(user._id, user);
-
-        const subject = "Forget Password";
-        const html = forgetPasswordTemplate(resetToken);
-        const sendMailRes = await sendMail(user.email, subject, html);
-
-        audit(
-            "User",
-            "forget password",
-            user.userName,
-            req.method,
-            res.statusCode
-        );
-        return res.status(201).json({
-            msg: "Check your email to reset your password",
-            data: {
-                sendMail: sendMailRes,
-                status: true,
-            },
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
-exports.resetPassword = async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            throw new CustomError("resetPassword", 422, errors.array()[0].msg);
+        } catch (error) {
+            next(error);
         }
-        const { password } = req.body;
-        const user = req.user;
-        const hashPassword = await bcrypt.hash(password, 12);
-        user.password = hashPassword;
-        await updateUser(user._id, user);
+    };
+    login = async (req, res, next) => {
+        try {
+            const { userName } = req.body;
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                throw new CustomError("login", 422, errors.array()[0].msg);
+            }
+            const payload = { username: userName };
 
-        user.token.passwordResetCount++;
-        updateUser(user._id, user);
-        audit(
-            "User",
-            "reset password",
-            user.userName,
-            req.method,
-            res.statusCode
-        );
-        return res.status(201).json({
-            msg: " user reset password successfully ",
-            data: {
-                status: true,
-            },
-        });
-    } catch (error) {
-        next(error);
-    }
-};
+            const token = jwt.sign(payload, env.secretKey, { expiresIn: "5h" });
+            audit("User", "Login", userName, req.method, res.statusCode);
+            return res.status(201).json({
+                msg: "user logged in ",
+                data: { token: token, status: true },
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+    forgetPassword = async (req, res, next) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                throw new CustomError(
+                    "forgetPassword",
+                    422,
+                    errors.array()[0].msg
+                );
+            }
+            const buffer = await new Promise((resolve, reject) => {
+                crypto.randomBytes(32, (err, buffer) => {
+                    if (err) {
+                        reject(
+                            new CustomError(
+                                "crypto randomToken",
+                                422,
+                                err.message
+                            )
+                        );
+                    }
+                    resolve(buffer);
+                });
+            });
+
+            const resetToken = buffer.toString("hex");
+            const resestTokenExpire = Date.now() + 600000;
+            const passwordResetCount = 0;
+
+            const user = req.user;
+            user.token = { resetToken, resestTokenExpire, passwordResetCount };
+
+            await this.userModel.update(user._id, user);
+
+            const subject = "Forget Password";
+            const html = forgetPasswordTemplate(resetToken);
+            const sendMailRes = await sendMail(user.email, subject, html);
+
+            audit(
+                "User",
+                "forget password",
+                user.userName,
+                req.method,
+                res.statusCode
+            );
+            return res.status(201).json({
+                msg: "Check your email to reset your password",
+                data: {
+                    sendMail: sendMailRes,
+                    status: true,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    resetPassword = async (req, res, next) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                throw new CustomError(
+                    "resetPassword",
+                    422,
+                    errors.array()[0].msg
+                );
+            }
+            const { password } = req.body;
+            const user = req.user;
+            const hashPassword = await bcrypt.hash(password, 12);
+            user.password = hashPassword;
+            await this.userModel.update(user._id, user);
+
+            user.token.passwordResetCount++;
+            this.userModel.update(user._id, user);
+            audit(
+                "User",
+                "reset password",
+                user.userName,
+                req.method,
+                res.statusCode
+            );
+            return res.status(201).json({
+                msg: " user reset password successfully ",
+                data: {
+                    status: true,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+}
+
+exports.AuthServices = AuthServices;

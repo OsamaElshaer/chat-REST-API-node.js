@@ -2,8 +2,8 @@ var { ObjectId } = require("mongodb");
 const request = require("supertest");
 const { app } = require("../loaders/app");
 const { mongoConnect, getDb } = require("../loaders/database");
-const { find } = require("../models/user.model");
-
+const { UserModel } = require("../models/user.model");
+const userModel = new UserModel()
 describe("user operations", () => {
     beforeAll(async () => {
         await mongoConnect();
@@ -43,7 +43,7 @@ describe("user operations", () => {
         const forgetPasswordResponse = await request(app)
             .post("/api/users/forgetPassword")
             .send({ email });
-        const user = await find("email", email);
+        const user = await userModel.find("email", email);
         expect(forgetPasswordResponse.body.data.sendMail).toBeTruthy();
 
         //reset password
