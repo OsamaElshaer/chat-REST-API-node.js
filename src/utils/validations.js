@@ -117,6 +117,7 @@ exports.validateCreateRoom = [
         .trim()
         .custom(async (value) => {
             const room = await roomModel.find("roomName", value);
+
             if (room) {
                 throw new Error("room name is already exist");
             }

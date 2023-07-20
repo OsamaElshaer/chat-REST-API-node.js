@@ -17,8 +17,8 @@ class RoomModel {
     // Get a room by its ID
     find = async (key, value) => {
         const query = { [key]: value }; // Dynamically use key parameter as the key name
-        const user = await getDb().collection("rooms").find(query);
-        return user;
+        const room = await getDb().collection("rooms").findOne(query);
+        return room;
     };
 }
 
