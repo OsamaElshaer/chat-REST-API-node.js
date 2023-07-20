@@ -10,6 +10,7 @@
 
 -   \_id: Unique room ID
 -   name: Room name or identifier
+-   createdBy
 -   participants: Array of user IDs participating in - - the room
 
 ### Message Collection:

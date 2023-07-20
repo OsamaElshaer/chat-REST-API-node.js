@@ -11,7 +11,7 @@ const {
     signUpTemplate,
 } = require("../utils/mailMessages");
 
-class AuthServices {
+class AuthService {
     constructor(userModel) {
         this.userModel = userModel;
     }
@@ -52,15 +52,17 @@ class AuthServices {
     };
     login = async (req, res, next) => {
         try {
-            const { userName } = req.body;
+            const user = req.user;
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 throw new CustomError("login", 422, errors.array()[0].msg);
             }
-            const payload = { username: userName };
+            const payload = { userId: user._id };
 
-            const token = jwt.sign(payload, env.secretKey, { expiresIn: "5h" });
-            audit("User", "Login", userName, req.method, res.statusCode);
+            const token = jwt.sign(payload, env.jwtSecretKey, {
+                expiresIn: "5h",
+            });
+            audit("User", "Login", user.userName, req.method, res.statusCode);
             return res.status(201).json({
                 msg: "user logged in ",
                 data: { token: token, status: true },
@@ -140,10 +142,8 @@ class AuthServices {
             const user = req.user;
             const hashPassword = await bcrypt.hash(password, 12);
             user.password = hashPassword;
-            await this.userModel.update(user._id, user);
-
             user.token.passwordResetCount++;
-            this.userModel.update(user._id, user);
+            await this.userModel.update(user._id, user);
             audit(
                 "User",
                 "reset password",
@@ -163,4 +163,4 @@ class AuthServices {
     };
 }
 
-exports.AuthServices = AuthServices;
+exports.AuthService = AuthService;

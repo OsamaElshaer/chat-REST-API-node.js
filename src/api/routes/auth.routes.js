@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { AuthServices } = require("../../services/auth.service");
+const { AuthService } = require("../../services/auth.service");
 const { UserModel } = require("../../models/user.model");
 const {
     validateSignup,
@@ -10,7 +10,7 @@ const {
 } = require("../../utils/validations");
 
 const userModel = new UserModel();
-const userService = new AuthServices(userModel);
+const userService = new AuthService(userModel);
 
 const { signUp, login, forgetPassword, resetPassword } = userService;
 

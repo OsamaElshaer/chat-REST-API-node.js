@@ -2,6 +2,7 @@ openapi: 3.0.0
 info:
     title: Chatty
     version: 1.0.0
+
 paths:
     /api/users/signup:
         post:
@@ -14,17 +15,26 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/SignupRequest"
-                        example:
-                            userName: JohnDoe
-                            email: john.doe@example.com
-                            password: Password@123
-                            passwordConfirmation: Password@123
+                            type: object
+                            properties:
+                                userName:
+                                    type: string
+                                    example: JohnDoe
+                                email:
+                                    type: string
+                                    example: john.doe@example.com
+                                password:
+                                    type: string
+                                    example: Password@123
+                                passwordConfirmation:
+                                    type: string
+                                    example: Password@123
             responses:
                 "201":
                     description: User signed up successfully
                 "422":
                     description: Validation error
+
     /api/users/login:
         post:
             summary: Login
@@ -36,15 +46,20 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/LoginRequest"
-                        example:
-                            userName: JohnDoe
-                            password: Password@123
+                            type: object
+                            properties:
+                                userName:
+                                    type: string
+                                    example: JohnDoe
+                                password:
+                                    type: string
+                                    example: Password@123
             responses:
                 "201":
                     description: User logged in successfully
                 "422":
                     description: Validation error
+
     /api/users/forgetPassword:
         post:
             summary: Forget Password
@@ -56,14 +71,17 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/ForgetPasswordRequest"
-                        example:
-                            email: john.doe@example.com
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    example: john.doe@example.com
             responses:
                 "201":
                     description: Password reset token sent successfully
                 "422":
                     description: Validation error
+
     /api/users/resetPassword/{resetToken}:
         post:
             summary: Reset Password
@@ -82,57 +100,47 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/ResetPasswordRequest"
-                        example:
-                            password: Password@123
-                            passwordConfirmation: Password@123
+                            type: object
+                            properties:
+                                password:
+                                    type: string
+                                    example: Password@123
+                                passwordConfirmation:
+                                    type: string
+                                    example: Password@123
             responses:
                 "201":
                     description: Password reset successfully
                 "422":
                     description: Validation error
+
+    /api/rooms/create:
+        post:
+            security:
+                - bearerAuth: []
+            summary: Create new room.
+            description: Create a new room by a user with authorization.
+            tags:
+                - Rooms
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                roomName:
+                                    type: string
+                                    example: room1
+            responses:
+                "201":
+                    description: Room created successfully
+                "422":
+                    description: Validation error
+
 components:
-    schemas:
-        SignupRequest:
-            type: object
-            properties:
-                userName:
-                    type: string
-                email:
-                    type: string
-                password:
-                    type: string
-                passwordConfirmation:
-                    type: string
-            example:
-                userName: JohnDoe
-                email: john.doe@example.com
-                password: Password@123
-                passwordConfirmation: Password@123
-        LoginRequest:
-            type: object
-            properties:
-                userName:
-                    type: string
-                password:
-                    type: string
-            example:
-                userName: JohnDoe
-                password: Password@123
-        ForgetPasswordRequest:
-            type: object
-            properties:
-                email:
-                    type: string
-            example:
-                email: john.doe@example.com
-        ResetPasswordRequest:
-            type: object
-            properties:
-                password:
-                    type: string
-                passwordConfirmation:
-                    type: string
-            example:
-                password: Password@123
-                passwordConfirmation: Password@123
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT

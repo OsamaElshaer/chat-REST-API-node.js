@@ -1,7 +1,9 @@
 const { body, param } = require("express-validator");
 const bcrypt = require("bcrypt");
 const { UserModel } = require("../models/user.model");
+const { RoomModel } = require("../models/room.model");
 const userModel = new UserModel();
+const roomModel = new RoomModel();
 
 exports.validateSignup = [
     body("userName")
@@ -103,5 +105,20 @@ exports.validateResetPassword = [
                 throw new Error("Password confirmation is incorrect");
             }
             return true;
+        }),
+];
+
+exports.validateCreateRoom = [
+    body("roomName")
+        .notEmpty()
+        .withMessage("Room name is required")
+        .isLength({ min: 3, max: 25 })
+        .withMessage("Room name must be between 3 and 50 characters")
+        .trim()
+        .custom(async (value) => {
+            const room = await roomModel.find("roomName", value);
+            if (room) {
+                throw new Error("room name is already exist");
+            }
         }),
 ];

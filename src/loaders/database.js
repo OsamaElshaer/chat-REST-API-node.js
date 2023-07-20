@@ -20,7 +20,7 @@ const mongoConnect = async () => {
     }
 };
 
-const getDb = () => {
+const getDb =  () => {
     if (_db) {
         return _db;
     }

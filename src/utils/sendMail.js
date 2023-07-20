@@ -37,7 +37,6 @@ exports.sendMail = async (emailTo, subject, html) => {
         return true;
     } catch (error) {
         logger.warn("Error sending email:", { error: error.message });
-        console.log(error);
         return false;
     }
 };
