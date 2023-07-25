@@ -20,6 +20,15 @@ class RoomModel {
         const room = await getDb().collection("rooms").findOne(query);
         return room;
     };
+
+    addParticipants = async (roomId, userId) => {
+        await getDb()
+            .collection("rooms")
+            .updateOne(
+                { _id: roomId }, // Use the roomId to identify the room
+                { $addToSet: { participants: userId } } // Add the userId to the participants array
+            );
+    };
 }
 
 module.exports.RoomModel = RoomModel;

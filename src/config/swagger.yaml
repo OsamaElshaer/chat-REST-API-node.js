@@ -137,6 +137,26 @@ paths:
                     description: Room created successfully
                 "422":
                     description: Validation error
+    /api/rooms/join/{roomName}:
+        post:
+            security:
+                - bearerAuth: []
+            summary: join to room.
+            description: join to room to broadcast chat with group of Participants.
+            tags:
+                - Rooms
+            parameters:
+                - in: path
+                  name: roomName
+                  description: room name that want to join
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: bidirection communication istablish
+                "404":
+                    description: not found
 
 components:
     securitySchemes:

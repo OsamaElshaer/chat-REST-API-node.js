@@ -1,8 +1,8 @@
 var { ObjectId } = require("mongodb");
-const { app } = require("../loaders/app");
-const request = require("supertest")(app);
-const { mongoConnect, getDb } = require("../loaders/database");
-const { UserModel } = require("../models/user.model");
+const { httpServer } = require("../src/loaders/app");
+const request = require("supertest")(httpServer);
+const { mongoConnect, getDb } = require("../src/loaders/database");
+const { UserModel } = require("../src/models/user.model");
 const userModel = new UserModel();
 let JwtToken = "";
 
@@ -61,6 +61,13 @@ describe("user operations", () => {
             .set("Authorization", `Bearer ${JwtToken}`)
             .send({ roomName: "room1" });
         expect(response.status).toBe(201);
+    });
+
+    it("it should open bidirection comunication with using socket Io", async () => {
+        const response = await request
+            .post("/api/rooms/join/room1")
+            .set("Authorization", `Bearer ${JwtToken}`);
+        expect(response.status).toBe(200);
     });
 
     afterAll(async () => {

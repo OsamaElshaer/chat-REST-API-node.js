@@ -1,6 +1,20 @@
 // express
 const express = require("express");
 const app = express();
+const { createServer } = require("http");
+const httpServer = createServer(app);
+const socketIo = require("socket.io");
+
+exports.ioObj = () => {
+    const io = socketIo(httpServer, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"],
+            credentials: true,
+        },
+    });
+    return io;
+};
 
 //npm packges
 const cors = require("cors");
@@ -24,11 +38,12 @@ app.use(express.json());
 // using the querystring library, which supports parsing simple form submissions. If you need to parse nested objects or arrays from the form data, you can set extended: true to use the qs library instead.
 app.use(express.urlencoded({ extended: true }));
 
-//cors
+// cors
 const corsOptions = {
     origin: whiteList,
 };
-app.use(cors(corsOptions));
+
+app.use(cors({ origin: "*" }));
 
 //protect against HTTP Parameter Pollution attacks
 app.use(hpp());
@@ -64,4 +79,4 @@ app.use(errorHandlerGlobal);
 
 // ---------------------------------------------------------------------------------------------------------------
 
-module.exports.app = app;
+module.exports = { httpServer: httpServer };
