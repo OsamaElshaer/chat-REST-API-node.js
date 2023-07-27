@@ -2,10 +2,6 @@ const { validationResult } = require("express-validator");
 const { ObjectId } = require("mongodb");
 const CustomError = require("../utils/customError");
 const { messageFormat } = require("../utils/messageFormat");
-const { RoomModel } = require("../models/room.model");
-const { ioObj } = require("../loaders/app");
-const roomModel = new RoomModel();
-const io = ioObj();
 
 class RoomService {
     constructor(roomModel) {
@@ -44,29 +40,26 @@ class RoomService {
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                next();
+                return next();
             }
+
+            const io = req.io; // Get the io instance from the req.app object
+
+            // Join the user to the specific room
             io.on("connection", async (socket) => {
-                // when user join room
-                await socket.emit(
+                socket.join(roomName);
+
+                // Send a welcome message to the user
+                socket.emit(
                     "message",
                     messageFormat(
                         "BOT",
                         roomName,
-                        `Welecome ${user.userId} to ${roomName} chat`
+                        `Welcome ${user.userName} to ${roomName} chat`
                     )
                 );
-                // make channel for room
-                await socket.join(roomName);
-                await roomModel.addParticipants(room._id, user.userId);
-                // chat message
-                await socket.on("message", (msg) => {
-                    io.to(roomName).emit(
-                        "message",
-                        messageFormat(user.userId, roomName, msg)
-                    );
-                });
-                // to tell other users that user join this room
+
+                // Broadcast a message to all users in the room when a new user joins
                 socket.broadcast
                     .to(roomName)
                     .emit(
@@ -74,12 +67,33 @@ class RoomService {
                         messageFormat(
                             "BOT",
                             roomName,
-                            `${user.userId} has join the chat`
+                            `${user.userName} has joined the chat`
                         )
                     );
+
+                // Chat message handling specific to this room
+                socket.on("message", async (msg) => {
+                    io.to(roomName).emit(
+                        "message",
+                        messageFormat(user.userName, roomName, msg)
+                    );
+                });
+
+                // Handle user disconnection
+                socket.on("disconnect", () => {
+                    io.to(roomName).emit(
+                        "message",
+                        messageFormat(
+                            "BOT",
+                            roomName,
+                            `${user.userName} has left the ${roomName} chat`
+                        )
+                    );
+                });
             });
+
             res.status(200).json({
-                msg: "bidirection communication istablish",
+                msg: "bidirectional communication established",
             });
         } catch (error) {
             next(error);

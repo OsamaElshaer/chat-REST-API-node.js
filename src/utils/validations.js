@@ -125,7 +125,7 @@ exports.validateCreateRoom = [
 ];
 
 exports.validateRoomJoin = [
-    param("roomId").custom(async (value, { req }) => {
+    param("roomName").custom(async (value, { req }) => {
         const room = await roomModel.find("name", value);
         if (!room) {
             throw new Error("there is no room with this name");

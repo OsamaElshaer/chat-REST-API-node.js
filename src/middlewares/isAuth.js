@@ -6,6 +6,7 @@ const isAuth = (req, res, next) => {
         const token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(token, config.jwtSecretKey);
         req.user = decoded;
+
         next();
     } catch (error) {
         throw new CustomError("Failed to get token", 401, error);

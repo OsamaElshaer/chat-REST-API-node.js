@@ -57,10 +57,10 @@ class AuthService {
             if (!errors.isEmpty()) {
                 throw new CustomError("login", 422, errors.array()[0].msg);
             }
-            const payload = { userId: user._id };
+            const payload = { userId: user._id, userName: user.userName };
 
             const token = jwt.sign(payload, env.jwtSecretKey, {
-                expiresIn: "5h",
+                expiresIn: "24h",
             });
             audit("User", "Login", user.userName, req.method, res.statusCode);
             return res.status(201).json({
