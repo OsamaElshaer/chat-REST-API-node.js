@@ -20,3 +20,6 @@
 -   senderId: ID of the user who sent the message
 -   content: Message content
 -   timestamp: Timestamp of when the message was sent
+
+
+for /r "C:\Users\osama\Desktop\chat-REST-API-node.js" %i in (*.js) do type "%i" >> "C:\Users\osama\Desktop\chat-REST-API-node.js\merged.js"

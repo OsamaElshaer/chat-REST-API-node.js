@@ -19,6 +19,8 @@ const { notFound404 } = require("../middlewares/notFound404");
 const { logger } = require("../utils/logger");
 const { router } = require("../api/index");
 const swagger = require("../config/swagger");
+const { handleSocketConnection } = require("../config/socket");
+const { isAuth } = require("../middlewares/isAuth");
 
 // -----------------------------------------Middleware-----------------------------------------------------------
 
@@ -28,19 +30,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // handle socket connection
-
-app.use((req, res, next) => {
-    const io = new Server(httpServer, {
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
-            credentials: true,
-        },
-    });
-    req.io = io;
-
-    next();
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+        credentials: true,
+    },
 });
+
 // cors
 const corsOptions = {
     origin: whiteList,
@@ -71,7 +68,12 @@ app.use(morgan("tiny", { stream: loggerStream }));
 
 // -----------------------------------------Routes---------------------------------------------------------------
 swagger(app);
+
 app.use("/api", router);
+
+io.on("connection", (socket) => {
+    handleSocketConnection(socket, io);
+});
 
 // ---------------------------------------------------------------------------------------------------------------
 //handling express errors

@@ -130,7 +130,6 @@ exports.validateRoomJoin = [
         if (!room) {
             throw new Error("there is no room with this name");
         }
-        req.room = room;
         return true;
     }),
 ];
