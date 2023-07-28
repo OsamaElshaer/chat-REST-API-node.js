@@ -39,9 +39,7 @@ class RoomService {
             if (!errors.isEmpty()) {
                 return next();
             }
-            res.status(200).json({
-                msg: "bidirection communication has been open",
-            });
+            res.status(200).json({ msg: "join room" });
         } catch (error) {
             next(error);
         }
