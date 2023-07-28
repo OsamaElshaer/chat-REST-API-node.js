@@ -70,7 +70,7 @@ app.use(morgan("tiny", { stream: loggerStream }));
 swagger(app);
 
 app.use("/api", router);
-
+app.use(isAuth);
 io.on("connection", (socket) => {
     handleSocketConnection(socket, io);
 });
