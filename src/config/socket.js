@@ -1,9 +1,13 @@
-// socket.js
+const jwt = require("jsonwebtoken");
+const { jwtSecretKey } = require("../config/env");
+const { RoomModel } = require("../models/room.model");
+const roomModel = new RoomModel();
 
 const { messageFormat } = require("../utils/messageFormat");
 // Socket connection handling function
 const handleSocketConnection = (socket, io) => {
-    const { roomName, userName } = socket.handshake.query;
+    const { roomName } = socket.handshake.query;
+    const { userName } = socket.user;
 
     socket.join(roomName);
 
@@ -43,4 +47,34 @@ const handleSocketConnection = (socket, io) => {
     });
 };
 
-module.exports = { handleSocketConnection };
+const isAuthSocket = (socket, next) => {
+    try {
+        const { token } = socket.handshake.query;
+        const user = jwt.verify(token, jwtSecretKey);
+        socket.user = user; // Attach the user object to the socket
+        next();
+    } catch (error) {
+        next(new Error("Invalid token")); // that error will be sent to the event listener connect_error
+    }
+};
+
+const validateRoomName = async (socket, next) => {
+    const { roomName } = socket.handshake.query;
+
+    if (!roomName || roomName.trim() === "") {
+        return next(new Error("Room name is required"));
+    }
+
+    // Check if the room exists in the database (you may need to change the model method accordingly)
+    const room = await roomModel.find("name", roomName);
+    if (!room) {
+        return next(new Error("There is no room with this name"));
+    }
+
+    // Attach the room name to the socket object for later use
+    socket.roomName = roomName;
+
+    next();
+};
+
+module.exports = { isAuthSocket, handleSocketConnection, validateRoomName };

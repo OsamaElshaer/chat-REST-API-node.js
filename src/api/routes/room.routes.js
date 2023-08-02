@@ -11,6 +11,6 @@ const {
 } = require("../../utils/validations");
 
 router.post("/create", isAuth, validateCreateRoom, roomService.create);
-router.post("/join/:roomName", isAuth, validateRoomJoin, roomService.join);
+router.post("/join/:roomName", roomService.join);
 
 exports.roomRouter = router;

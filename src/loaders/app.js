@@ -11,6 +11,7 @@ const helmet = require("helmet");
 const hpp = require("hpp");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
+const jwt = require("jsonwebtoken");
 
 //require from modules
 const { whiteList } = require("../config/env");
@@ -19,9 +20,11 @@ const { notFound404 } = require("../middlewares/notFound404");
 const { logger } = require("../utils/logger");
 const { router } = require("../api/index");
 const swagger = require("../config/swagger");
-const { handleSocketConnection } = require("../config/socket");
-const { isAuth } = require("../middlewares/isAuth");
-
+const {
+    handleSocketConnection,
+    isAuthSocket,
+    validateRoomName,
+} = require("../config/socket");
 // -----------------------------------------Middleware-----------------------------------------------------------
 
 //parses the incoming JSON request body into a JavaScript object.
@@ -70,10 +73,15 @@ app.use(morgan("tiny", { stream: loggerStream }));
 swagger(app);
 
 app.use("/api", router);
-
-io.on("connection", (socket) => {
-    handleSocketConnection(socket, io);
-});
+io.use(async (socket, next) => {
+    isAuthSocket(socket, next);
+})
+    .use(async (socket, next) => {
+        validateRoomName(socket, next);
+    })
+    .on("connection", (socket) => {
+        handleSocketConnection(socket, io);
+    });
 
 // ---------------------------------------------------------------------------------------------------------------
 //handling express errors

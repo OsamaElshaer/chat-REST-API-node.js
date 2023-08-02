@@ -2,7 +2,6 @@ const { body, param } = require("express-validator");
 const bcrypt = require("bcrypt");
 const { UserModel } = require("../models/user.model");
 const { RoomModel } = require("../models/room.model");
-const { AutoEncryptionLoggerLevel, ObjectId } = require("mongodb");
 const userModel = new UserModel();
 const roomModel = new RoomModel();
 
@@ -122,14 +121,4 @@ exports.validateCreateRoom = [
                 throw new Error("room name is already exist");
             }
         }),
-];
-
-exports.validateRoomJoin = [
-    param("roomName").custom(async (value, { req }) => {
-        const room = await roomModel.find("name", value);
-        if (!room) {
-            throw new Error("there is no room with this name");
-        }
-        return true;
-    }),
 ];

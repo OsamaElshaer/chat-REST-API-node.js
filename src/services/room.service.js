@@ -33,17 +33,7 @@ class RoomService {
         }
     };
 
-    join = async (req, res, next) => {
-        try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return next();
-            }
-            res.status(200).json({ msg: "join room" });
-        } catch (error) {
-            next(error);
-        }
-    };
+    join = async (req, res, next) => {};
 }
 
 exports.RoomService = RoomService;
