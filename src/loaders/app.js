@@ -73,16 +73,18 @@ app.use(morgan("tiny", { stream: loggerStream }));
 swagger(app);
 
 app.use("/api", router);
-io.use(async (socket, next) => {
-    isAuthSocket(socket, next);
-})
+const nameSpace = io.of("/api/rooms/join");
+
+nameSpace
+    .use(async (socket, next) => {
+        isAuthSocket(socket, next);
+    })
     .use(async (socket, next) => {
         validateRoomName(socket, next);
     })
     .on("connection", (socket) => {
-        handleSocketConnection(socket, io);
+        handleSocketConnection(socket, nameSpace); // Pass nameSpace instead of io
     });
-
 // ---------------------------------------------------------------------------------------------------------------
 //handling express errors
 app.all("*", notFound404);

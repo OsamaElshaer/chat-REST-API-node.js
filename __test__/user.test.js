@@ -63,13 +63,6 @@ describe("user operations", () => {
         expect(response.status).toBe(201);
     });
 
-    it("it should open bidirection comunication with using socket Io", async () => {
-        const response = await request
-            .post("/api/rooms/join/room1")
-            .set("Authorization", `Bearer ${JwtToken}`);
-        expect(response.status).toBe(200);
-    });
-
     afterAll(async () => {
         await getDb().dropDatabase();
     });

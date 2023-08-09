@@ -54,7 +54,7 @@ const isAuthSocket = (socket, next) => {
         socket.user = user; // Attach the user object to the socket
         next();
     } catch (error) {
-        next(new Error("Invalid token")); // that error will be sent to the event listener connect_error
+        next(new Error(error.message)); // that error will be sent to the event listener connect_error
     }
 };
 
