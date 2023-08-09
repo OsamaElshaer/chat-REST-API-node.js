@@ -126,18 +126,10 @@ chaty is built using a combination of powerful technologies and packages:
         -   Reading YAML configuration files.
 
 -   Cross-Platform Development:
-<<<<<<< HEAD
 
     -   [cross-env](https://www.npmjs.com/package/cross-env): ^7.0.3
         -   Setting environment variables across different platforms.
 
-=======
-    -   [cross-env](https://www.npmjs.com/package/cross-env): ^7.0.3
-        -   Setting environment variables across different platforms.
-
-### Dev Dependencies
-
->>>>>>> 0ac7159322f64585cb448f4f803327e76bf3a290
 -   Testing:
 
     -   [jest](https://www.npmjs.com/package/jest): ^29.6.1
