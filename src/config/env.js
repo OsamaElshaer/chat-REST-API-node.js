@@ -17,7 +17,7 @@ module.exports = {
     port: PORT,
     whiteList: WHITE_LIST,
     email: EMAIL,
-    dbHost: DB_HOST,
+    dbHost: DB_HOST || "mongodb://localhost:27017",
     nodemailerUser: NODEMAILER_USER,
     nodemailerPass: NODEMAILER_PASS,
     jwtSecretKey: JWT_SECRET_KEY,
